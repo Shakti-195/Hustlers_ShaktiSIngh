@@ -1,4 +1,7 @@
-const API = "http://127.0.0.1:8000";
+const isProd = import.meta.env.MODE === "production";
+const API = isProd 
+  ? "https://event-ticketing-api-fs8v.onrender.com"
+  : "http://127.0.0.1:8000";
 
 // ✅ Auto-attach token to every fetch request
 const getHeaders = () => {
