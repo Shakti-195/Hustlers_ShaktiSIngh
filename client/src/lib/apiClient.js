@@ -1,5 +1,7 @@
-// const API = "https://event-ticketing-api-fs8v.onrender.com"; // ❌ Render is throwing a 500 Error
-const API = "http://localhost:8000"; // ✅ Use local backend for development
+const isProd = import.meta.env.MODE === "production";
+const API = isProd 
+  ? "https://event-ticketing-api-fs8v.onrender.com"
+  : "http://localhost:8000";
 
 // ✅ Auto-attach token to every fetch request
 const getHeaders = () => {
