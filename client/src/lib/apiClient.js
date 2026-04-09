@@ -1,4 +1,4 @@
-const API = "http://localhost:8000";
+const API = "https://event-ticketing-api-fs8v.onrender.com";
 
 // ✅ Auto-attach token to every fetch request
 const getHeaders = () => {

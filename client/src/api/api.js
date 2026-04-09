@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:8000",
+  // baseURL: "http://localhost:8000", // ❌ Local udao
+  baseURL: "https://event-ticketing-api-fs8v.onrender.com", // ✅ Render URL daalo
 });
 
 // ✅ Attach token automatically to every request
