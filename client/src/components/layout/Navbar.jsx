@@ -11,7 +11,11 @@ export default function Navbar() {
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
-    setUser(stored ? JSON.parse(stored) : null);
+    try {
+      setUser(stored && stored !== 'undefined' ? JSON.parse(stored) : null);
+    } catch(e) {
+      setUser(null);
+    }
 
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);

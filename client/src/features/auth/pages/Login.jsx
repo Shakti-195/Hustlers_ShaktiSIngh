@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { loginUser } from "../../../api/auth";
+// ✅ Ensure path is correct to your NEW api client
+import { loginUser } from "../../../lib/apiClient"; 
 import Logo from "../../../components/ui/Logo";
 
 export default function Login() {
@@ -16,15 +17,24 @@ export default function Login() {
     setError("");
 
     try {
-      await loginUser({ email, password });
-      const user = JSON.parse(localStorage.getItem("user"));
+      // 1. Login API call
+      const response = await loginUser({ email, password });
+      
+      // 2. Response se direct user role check karein (Safe approach)
+      const user = response.user || { email: response.email, role: response.role }; 
 
-      if (user?.role === "admin") navigate("/admin");
-      else navigate("/home");
+      if (user?.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/home");
+      }
 
-      window.location.reload();
+      // 3. Page refresh optional hai agar aap state management use kar rahe hain
+      // window.location.reload(); 
     } catch (err) {
-      setError(err.response?.data?.detail || "Invalid email or password");
+      // Backend se detail message dikhayein agar available ho
+      const errorMsg = err.response?.data?.detail || err.message || "Invalid email or password";
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -32,9 +42,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-pink-50 p-4">
-
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
-
         {/* TOP BANNER */}
         <div className="bg-gradient-to-r from-orange-500 to-pink-500 px-10 py-8 text-center flex flex-col items-center">
           <Logo className="h-16 w-16 mb-3" />
@@ -48,7 +56,6 @@ export default function Login() {
 
         {/* FORM */}
         <div className="px-10 py-8">
-
           {error && (
             <div className="w-full bg-red-50 text-red-600 p-3 rounded-xl text-xs mb-5 font-bold border border-red-100">
               {error}
@@ -60,6 +67,7 @@ export default function Login() {
               type="email"
               placeholder="Email Address"
               className="w-full px-5 py-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-400 transition-all"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
@@ -67,6 +75,7 @@ export default function Login() {
               type="password"
               placeholder="Password"
               className="w-full px-5 py-4 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-orange-400 transition-all"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
@@ -88,7 +97,6 @@ export default function Login() {
               Sign Up
             </span>
           </p>
-
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
-const API = "https://event-ticketing-api-fs8v.onrender.com";
+// const API = "https://event-ticketing-api-fs8v.onrender.com"; // ❌ Render is throwing a 500 Error
+const API = "http://localhost:8000"; // ✅ Use local backend for development
 
 // ✅ Auto-attach token to every fetch request
 const getHeaders = () => {
@@ -15,7 +16,7 @@ const getHeaders = () => {
 
 export const signupUser = async (userData) => {
   try {
-    const res = await fetch(`${API}/auth/signup`, {
+    const res = await fetch(`${API}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
@@ -42,7 +43,10 @@ export const loginUser = async (credentials) => {
     // ✅ Save token and user info
     if (data.access_token) {
       localStorage.setItem("token", data.access_token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      
+      // Construct user object safely depending on backend structure
+      const userObj = data.user || { email: data.email, role: data.role };
+      localStorage.setItem("user", JSON.stringify(userObj));
     }
     return data;
   } catch (err) {
