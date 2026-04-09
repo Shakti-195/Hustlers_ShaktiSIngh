@@ -42,7 +42,7 @@ We built a Hyper-Local Event Ticketing Platform that allows users to easily disc
 * Admin dashboard for event creation and management
 
 **Tech Stack:**
-React (Vite), Tailwind CSS, FastAPI (Python), MongoDB Atlas, JWT Authentication, QR Code Generator
+React (Vite), Tailwind CSS, FastAPI (Python), MongoDB Atlas, JWT Authentication, QR Code Generator,razorpay
 
 **Impact:**
 This solution simplifies event management and enhances user experience by making event discovery and ticketing seamless. It reduces manual errors, prevents unauthorized entry, and promotes local events, helping communities stay connected and organized.
