@@ -13,7 +13,7 @@ const getHeaders = () => {
 };
 
 // =====================
-// 🔐 AUTH (Signup & Login) - Added these
+// 🔐 AUTH (Signup & Login) 
 // =====================
 
 export const signupUser = async (userData) => {
@@ -113,5 +113,39 @@ export const bookTicket = async (payload) => {
   } catch (err) {
     console.error("Booking error:", err);
     throw err;
+  }
+};
+
+// =====================
+// RAZORPAY (Create Order)
+// =====================
+export const createRazorpayOrder = async (amount) => {
+  try {
+    const res = await fetch(`${API}/payment/create-order?amount=${amount}`, {
+      method: "POST",
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("Payment error:", err);
+    return null;
+  }
+};
+
+// =====================
+// RAZORPAY (Verify Sig)
+// =====================
+export const verifyRazorpayPayment = async (data) => {
+  try {
+    const res = await fetch(`${API}/payment/verify`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("Verification error:", err);
+    return null;
   }
 };

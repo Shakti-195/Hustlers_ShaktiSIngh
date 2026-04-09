@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getEvent } from "../../../lib/apiClient";
-import { bookTicket } from "../../../lib/apiClient";
+import { getEvent, bookTicket } from "../../../lib/apiClient";
 import eventsData from "../../events/data/events";
 
 export default function BookTicket() {
@@ -12,52 +11,87 @@ export default function BookTicket() {
   const [tickets, setTickets] = useState(1);
   const [loading, setLoading] = useState(false);
 
+  // 🔥 Fetch Event
   useEffect(() => {
     const fetchEvent = async () => {
-      // ✅ Try backend first
-      const backendEvent = await getEvent(id);
+      try {
+        const backendEvent = await getEvent(id);
 
-      if (backendEvent) {
-        setEvent({
-          ...backendEvent,
-          id: backendEvent._id || backendEvent.id,
-        });
-      } else {
-        // 🔥 Fallback to local data
-        const local = eventsData.find((e) => e.id === Number(id));
-        if (local) setEvent(local);
+        if (backendEvent) {
+          setEvent({
+            ...backendEvent,
+            id: backendEvent._id || backendEvent.id,
+          });
+        } else {
+          // fallback to local data
+          const local = eventsData.find((e) => e.id === Number(id));
+          if (local) setEvent(local);
+        }
+      } catch (err) {
+        console.error("Error fetching event:", err);
       }
     };
 
     fetchEvent();
   }, [id]);
 
+  // ⏳ Loading state
   if (!event) {
-    return <div className="p-6 text-gray-400">Event not found</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-500">
+        Loading event...
+      </div>
+    );
   }
 
   const total = tickets * event.price;
 
+  // 💳 Handle Booking → Payment
   const handleBooking = async () => {
     setLoading(true);
 
-    const token = localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
 
-    if (token) {
-      // ✅ Real backend booking
-      const res = await bookTicket({ event_id: String(event.id) });
+      let bookingData = {
+        event,
+        tickets,
+        total,
+      };
 
-      if (res && res.booking_id) {
-        navigate(`/success/${event.id}`, {
-          state: { event, tickets, total, bookingId: res.booking_id, qr: res.qr_code },
+      // ✅ Backend booking (if logged in)
+      if (token) {
+        const res = await bookTicket({
+          event_id: event.id,
+          tickets: tickets,
+          total: total,
         });
-      } else {
-        // Booking error — still go to success with local state
-        navigate(`/success/${event.id}`, { state: { event, tickets, total } });
+
+        if (res && res.booking_id) {
+          bookingData = {
+            ...bookingData,
+            bookingId: res.booking_id,
+            qr: res.qr_code,
+          };
+        }
       }
-    } else {
-      // 🔥 Not logged in — demo flow
-      navigate(`/success/${event.id}`, { state: { event, tickets, total } });
+
+      // 👉 Navigate to Payment Page
+      navigate("/payment", {
+        state: bookingData,
+      });
+
+    } catch (error) {
+      console.error("Booking failed:", error);
+
+      // fallback: still go to payment
+      navigate("/payment", {
+        state: {
+          event,
+          tickets,
+          total,
+        },
+      });
     }
 
     setLoading(false);
@@ -68,7 +102,7 @@ export default function BookTicket() {
 
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl w-full grid md:grid-cols-2">
 
-        {/* LEFT - IMAGE */}
+        {/* 🔥 LEFT SIDE - EVENT IMAGE */}
         <div className="relative">
           <img
             src={event.image}
@@ -82,7 +116,7 @@ export default function BookTicket() {
           </div>
         </div>
 
-        {/* RIGHT - BOOKING */}
+        {/* 🔥 RIGHT SIDE - BOOKING DETAILS */}
         <div className="p-6 flex flex-col justify-between">
 
           <div>
@@ -91,7 +125,7 @@ export default function BookTicket() {
             </h1>
 
             <p className="text-gray-500 mb-6">
-              Select number of tickets and confirm your booking
+              Select number of tickets and proceed to payment
             </p>
 
             {/* PRICE */}
@@ -102,7 +136,7 @@ export default function BookTicket() {
               </p>
             </div>
 
-            {/* TICKET SELECTOR */}
+            {/* 🎫 TICKET SELECTOR */}
             <div className="flex items-center justify-between bg-gray-100 p-4 rounded-xl mb-6">
 
               <span className="font-medium text-gray-700">Tickets</span>
@@ -110,7 +144,7 @@ export default function BookTicket() {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setTickets((prev) => Math.max(1, prev - 1))}
-                  className="w-8 h-8 bg-white shadow rounded-full"
+                  className="w-8 h-8 bg-white shadow rounded-full text-lg"
                 >
                   -
                 </button>
@@ -119,15 +153,14 @@ export default function BookTicket() {
 
                 <button
                   onClick={() => setTickets((prev) => prev + 1)}
-                  className="w-8 h-8 bg-white shadow rounded-full"
+                  className="w-8 h-8 bg-white shadow rounded-full text-lg"
                 >
                   +
                 </button>
               </div>
-
             </div>
 
-            {/* TOTAL */}
+            {/* 💰 TOTAL */}
             <div className="flex justify-between items-center mb-6">
               <span className="text-gray-600">Total Amount</span>
               <span className="text-xl font-bold text-green-600">
@@ -136,13 +169,13 @@ export default function BookTicket() {
             </div>
           </div>
 
-          {/* BUTTON */}
+          {/* 💳 BUTTON */}
           <button
             onClick={handleBooking}
             disabled={loading}
             className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 rounded-xl text-lg font-semibold hover:scale-105 transition disabled:opacity-50"
           >
-            {loading ? "Booking..." : "Confirm Booking 🚀"}
+            {loading ? "Processing..." : "Proceed to Payment 💳"}
           </button>
 
         </div>

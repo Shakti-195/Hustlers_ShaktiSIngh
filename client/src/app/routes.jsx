@@ -13,6 +13,8 @@ import Login from "../features/auth/pages/Login";
 import Signup from "../features/auth/pages/Signup";
 import ScanTicket from "../features/bookings/pages/ScanTicket";
 import Landing from "../features/landing/pages/Landing";
+import Payment from "../features/payments/PaymentPage";
+import SuccessPage from "../features/payments/SuccessPage";
 
 export default function AppRoutes() {
   return (
@@ -36,7 +38,10 @@ export default function AppRoutes() {
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/create" element={<CreateEvent />} />
+        <Route path="/payment" element={<Payment />} />
+<Route path="/payment-success" element={<SuccessPage />} />
       </Route>
+      
 
       <Route path="*" element={<NotFound />} />
 
